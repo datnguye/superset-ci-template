@@ -31,7 +31,7 @@ jobs:
             mv superset-ci-template superset-ci-template-$(date +%s) > /dev/null
             git clone https://${{ secrets.GIHUB_ACTION_USER }}:${{ secrets.GIHUB_ACTION_TOKEN }}@github.com/datnguye/superset-ci-template.git
 
-      - name: install dependencies
+      - name: install superset
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -45,6 +45,13 @@ jobs:
             python -m venv venv
             . venv/bin/activate
             python -m pip install apache-superset
+            python -m pip install Flask-WTF==0.14.2
+            python -m pip install werkzeug==0.16.1
+            python -m pip install pillow==8.4.0
+            superset db upgrade
+            superset fab create-admin --username ${secrets.SUPERSET_ADMIN_USR} --firstname Dat --lastname Nguyen --email datnguyen.it09@gmail.com --password ${secrets.SUPERSET_ADMIN_PWD}
+            superset load_examples
+            superset init
 
       # - name: make service files
       #   uses: appleboy/ssh-action@master
