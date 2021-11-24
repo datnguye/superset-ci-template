@@ -69,8 +69,8 @@ jobs:
             echo "Restart=always"                                                     >> ${{ env.nginx_unit_path }}
             echo "WorkingDirectory=/root/superset-ci-template"                        >> ${{ env.nginx_unit_path }}
             echo "VIRTUAL_ENV=/root/superset-ci-template/venv"                        >> ${{ env.nginx_unit_path }}
-            echo "Enviroment=PATH=\$VIRTUAL_ENV/bin:\$PATH"                           >> {{ env.nginx_unit_path }}
-            echo "ExecStart=/root/superset-ci-template/venv/bin/python -m superset run -p ${{ env.service_port }} --with-threads" >> {{ env.nginx_unit_path }}
+            echo "Enviroment=PATH=\$VIRTUAL_ENV/bin:\$PATH"                           >> ${{ env.nginx_unit_path }}
+            echo "ExecStart=/root/superset-ci-template/venv/bin/python -m superset run -p ${{ env.service_port }} --with-threads" >> ${{ env.nginx_unit_path }}
             echo "[Install]"                                                          >> ${{ env.nginx_unit_path }}
             echo "WantedBy=multi-user.target"                                         >> ${{ env.nginx_unit_path }}
             #
