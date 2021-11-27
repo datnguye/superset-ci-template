@@ -28,5 +28,6 @@ runs:
         passphrase: ${{ inputs.ssh-passphrase }}
         key: ${{ inputs.ssh-key }}
         script: |
-          mv ${{ inputs.who-to-greet }} ${{ inputs.who-to-greet }}-$(date +%s) > /dev/null
+          mkdir /root/archive
+          mv ${{ inputs.project-name }} /root/archive/${{ inputs.project-name }}-$(date +%s) > /dev/null
           git clone https://${{ inputs.git-user }}:${{ inputs.git-token }}@github.com/datnguye/${{ inputs.who-to-greet }}.git
