@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout
 
-      - uses: actions/ssh-checkout@main
+      - uses: ./.github/actions/ssh-checkout@main
         name: checkout
         with:
           project-name: ${{ env.project_name }}
