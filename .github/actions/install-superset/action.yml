@@ -10,8 +10,6 @@ inputs:
     required: true
   ssh-key:
     required: true
-  ssh-key:
-    required: true
   superset-user:
     required: true
   superset-password:
