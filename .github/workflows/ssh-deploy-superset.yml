@@ -1,0 +1,74 @@
+name: SSH deployment
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    
+
+env:
+  project_name: superset-ci-template
+  service_name: ${{ secrets.NGINX_SERVICE_NAME }}
+  service_port: ${{ secrets.NGINX_SERVICE_PORT }}
+  nginx_site_path: ${{ secrets.NGINX_SITE_PATH }}/${{ secrets.NGINX_SERVICE_NAME }}.${{ secrets.DOMAIN }}
+  nginx_unit_path: ${{ secrets.NGINX_UNIT_PATH }}/${{ secrets.NGINX_SERVICE_NAME }}.service
+  
+
+jobs:
+      
+  ssh_publish:
+    runs-on: ubuntu-20.04
+    
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Run ssh checkout
+        uses: ./.github/actions/ssh-checkout
+        with:
+          project-name: ${{ env.project_name }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-username: ${{ secrets.SSH_USER }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          git-user: ${{ secrets.GIHUB_ACTION_USER }}
+          git-token: ${{ secrets.GIHUB_ACTION_TOKEN }}
+
+      - name: Run install superset
+        uses: ./.github/actions/install-superset
+        with:
+          project-name: ${{ env.project_name }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-username: ${{ secrets.SSH_USER }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          superset-user: ${{ secrets.SUPERSET_ADMIN_USR }}
+          superset-token: ${{ secrets.SUPERSET_ADMIN_PWD }}
+
+
+      - name: Run create service unit files
+        uses: ./.github/actions/create-python-unit
+        with:
+          project-name: ${{ env.project_name }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-username: ${{ secrets.SSH_USER }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          unit-service-path: ${{ env.nginx_unit_path }}
+          unit-service-exec: superset run -p ${{ env.service_port }} --with-threads"
+          unit-service-port: ${{ env.service_port }}
+          unit-site-path: ${{ env.nginx_site_path }}
+          unit-site-domain: ${{ env.service_name }}.${{ secrets.DOMAIN }}
+
+      # - name: start service
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     passphrase: ${{ secrets.SSH_PASSPHRASE }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     script: |
+      #       systemctl enable ${{ env.service_name }}.service
+      #       systemctl daemon-reload
+      #       systemctl restart ${{ env.service_name }}.service
+      #       # systemctl status ${{ env.service_name }}.service
