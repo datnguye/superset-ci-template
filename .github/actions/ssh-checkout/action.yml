@@ -5,16 +5,28 @@ inputs:
     description: 'Project name'
     required: true
     default: 'your-repo-name'
+  ssh-host:
+    required: true
+  ssh-username:
+    required: true
+  ssh-passphrase:
+    required: true
+  ssh-key:
+    required: true
+  git-user:
+    required: true
+  git-token:
+    required: true
 runs:
   using: "composite"
   steps:
     - name: checkout
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        host: ${{ inputs.ssh-host }}
+        username: ${{ inputs.ssh-username }}
+        passphrase: ${{ inputs.ssh-passphrase }}
+        key: ${{ inputs.ssh-key }}
         script: |
           mv ${{ inputs.who-to-greet }} ${{ inputs.who-to-greet }}-$(date +%s) > /dev/null
-          git clone https://${{ secrets.GIHUB_ACTION_USER }}:${{ secrets.GIHUB_ACTION_TOKEN }}@github.com/datnguye/${{ inputs.who-to-greet }}.git
+          git clone https://${{ inputs.git-user }}:${{ inputs.git-token }}@github.com/datnguye/${{ inputs.who-to-greet }}.git

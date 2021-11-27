@@ -23,10 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
-      - name: checkout
+      - name: Run ssh checkout
         uses: ./.github/actions/ssh-checkout
         with:
           project-name: ${{ env.project_name }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-username: ${{ secrets.SSH_USER }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          git-user: ${{ secrets.GIHUB_ACTION_USER }}
+          git-token: ${{ secrets.GIHUB_ACTION_TOKEN }}
 
       # - name: install superset
       #   uses: appleboy/ssh-action@master
