@@ -43,7 +43,7 @@ jobs:
           ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
           superset-user: ${{ secrets.SUPERSET_ADMIN_USR }}
-          superset-token: ${{ secrets.SUPERSET_ADMIN_PWD }}
+          superset-password: ${{ secrets.SUPERSET_ADMIN_PWD }}
 
       - name: Run create service unit files
         uses: ./.github/actions/ssh-create-python-unit
