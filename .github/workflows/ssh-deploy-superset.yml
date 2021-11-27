@@ -35,7 +35,7 @@ jobs:
           git-token: ${{ secrets.GIHUB_ACTION_TOKEN }}
 
       - name: Run install superset
-        uses: ./.github/actions/install-superset
+        uses: ./.github/actions/ssh-install-superset
         with:
           project-name: ${{ env.project_name }}
           ssh-host: ${{ secrets.SSH_HOST }}
@@ -46,7 +46,7 @@ jobs:
           superset-token: ${{ secrets.SUPERSET_ADMIN_PWD }}
 
       - name: Run create service unit files
-        uses: ./.github/actions/create-python-unit
+        uses: ./.github/actions/ssh-create-python-unit
         with:
           project-name: ${{ env.project_name }}
           ssh-host: ${{ secrets.SSH_HOST }}
@@ -60,7 +60,7 @@ jobs:
           unit-site-domain: ${{ env.service_name }}.${{ secrets.DOMAIN }}
 
       - name: Run start service
-        uses: ./.github/actions/start-service
+        uses: ./.github/actions/ssh-start-service
         with:
           project-name: ${{ env.project_name }}
           ssh-host: ${{ secrets.SSH_HOST }}

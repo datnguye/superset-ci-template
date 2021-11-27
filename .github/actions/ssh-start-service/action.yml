@@ -10,8 +10,6 @@ inputs:
     required: true
   ssh-key:
     required: true
-  ssh-key:
-    required: true
   unit-service-name:
     required: true
     default: myservice
