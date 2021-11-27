@@ -8,6 +8,7 @@ on:
     
 
 env:
+  project_name: superset-ci-template
   service_name: ${{ secrets.NGINX_SERVICE_NAME }}
   service_port: ${{ secrets.NGINX_SERVICE_PORT }}
   nginx_site_path: ${{ secrets.NGINX_SITE_PATH }}/${{ secrets.NGINX_SERVICE_NAME }}.${{ secrets.DOMAIN }}
@@ -20,81 +21,77 @@ jobs:
     runs-on: ubuntu-20.04
     
     steps:
-      - name: checkout
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            mv superset-ci-template superset-ci-template-$(date +%s) > /dev/null
-            git clone https://${{ secrets.GIHUB_ACTION_USER }}:${{ secrets.GIHUB_ACTION_TOKEN }}@github.com/datnguye/superset-ci-template.git
+      - uses: actions/checkout
 
-      - name: install superset
-        uses: appleboy/ssh-action@master
+      - uses: actions/ssh-checkout@main
+        name: checkout
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /root/superset-ci-template
-            apt-get install build-essential libssl-dev libffi-dev python3-dev python3-pip libsasl2-dev libldap2-dev
-            python -m pip install virtualenv
-            python -m venv venv
-            . venv/bin/activate
-            python -m pip install apache-superset
-            python -m pip install Flask-WTF==0.14.2
-            python -m pip install werkzeug==0.16.1
-            python -m pip install pillow==8.4.0
-            superset db upgrade
-            superset fab create-admin --username ${secrets.SUPERSET_ADMIN_USR} --firstname Dat --lastname Nguyen --email datnguyen.it09@gmail.com --password ${secrets.SUPERSET_ADMIN_PWD}
-            superset load_examples
-            superset init
+          project-name: ${{ env.project_name }}
 
-      - name: make service files
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "[Unit]"                                                             >  ${{ env.nginx_unit_path }}
-            echo "Description=superset service"                                       >> ${{ env.nginx_unit_path }}
-            echo "After=multi-user.target"                                            >> ${{ env.nginx_unit_path }}
-            echo "[Service]"                                                          >> ${{ env.nginx_unit_path }}
-            echo "Type=simple"                                                        >> ${{ env.nginx_unit_path }}
-            echo "Restart=always"                                                     >> ${{ env.nginx_unit_path }}
-            echo "WorkingDirectory=/root/superset-ci-template"                        >> ${{ env.nginx_unit_path }}
-            echo "VIRTUAL_ENV=/root/superset-ci-template/venv"                        >> ${{ env.nginx_unit_path }}
-            echo "Enviroment=PATH=\$VIRTUAL_ENV/bin:\$PATH"                           >> ${{ env.nginx_unit_path }}
-            echo "ExecStart=/root/superset-ci-template/venv/bin/python -m superset run -p ${{ env.service_port }} --with-threads" >> ${{ env.nginx_unit_path }}
-            echo "[Install]"                                                          >> ${{ env.nginx_unit_path }}
-            echo "WantedBy=multi-user.target"                                         >> ${{ env.nginx_unit_path }}
-            #
-            echo "server {"                                                           >  ${{ env.nginx_site_path }}
-            echo "  server_name ${{ env.service_name }}.${{ secrets.DOMAIN }};"       >> ${{ env.nginx_site_path }}
-            echo "  location / {"                                                     >> ${{ env.nginx_site_path }}
-            echo "    proxy_pass http://127.0.0.1:${{env.service_port}};"             >> ${{ env.nginx_site_path }}
-            echo "    proxy_set_header Host \$host;"                                  >> ${{ env.nginx_site_path }}
-            echo "    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;"  >> ${{ env.nginx_site_path }}
-            echo "    proxy_set_header X-Forwarded-Proto \$scheme;"                   >> ${{ env.nginx_site_path }}
-            echo "  }"                                                                >> ${{ env.nginx_site_path }}
-            echo "}"                                                                  >> ${{ env.nginx_site_path }}
-            #
-            certbot --nginx -d ${{ env.service_name }}.${{ secrets.DOMAIN }} --non-interactive --agree-tos -m datnguyen.it09@gmail.com
+      # - name: install superset
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     passphrase: ${{ secrets.SSH_PASSPHRASE }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     script: |
+      #       cd /root/${{ env.project_name }}
+      #       apt-get install build-essential libssl-dev libffi-dev python3-dev python3-pip libsasl2-dev libldap2-dev
+      #       python -m pip install virtualenv
+      #       python -m venv venv
+      #       . venv/bin/activate
+      #       python -m pip install apache-superset
+      #       python -m pip install Flask-WTF==0.14.2
+      #       python -m pip install werkzeug==0.16.1
+      #       python -m pip install pillow==8.4.0
+      #       superset db upgrade
+      #       superset fab create-admin --username ${secrets.SUPERSET_ADMIN_USR} --firstname Dat --lastname Nguyen --email datnguyen.it09@gmail.com --password ${secrets.SUPERSET_ADMIN_PWD}
+      #       superset load_examples
+      #       superset init
 
-      - name: start service
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            systemctl enable ${{ env.service_name }}.service
-            systemctl daemon-reload
-            systemctl restart ${{ env.service_name }}.service
-            systemctl status ${{ env.service_name }}.service
+      # - name: make service files
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     passphrase: ${{ secrets.SSH_PASSPHRASE }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     script: |
+      #       echo "[Unit]"                                                             >  ${{ env.nginx_unit_path }}
+      #       echo "Description=superset service"                                       >> ${{ env.nginx_unit_path }}
+      #       echo "After=multi-user.target"                                            >> ${{ env.nginx_unit_path }}
+      #       echo "[Service]"                                                          >> ${{ env.nginx_unit_path }}
+      #       echo "Type=simple"                                                        >> ${{ env.nginx_unit_path }}
+      #       echo "Restart=always"                                                     >> ${{ env.nginx_unit_path }}
+      #       echo "WorkingDirectory=/root/${{ env.project_name }}"                     >> ${{ env.nginx_unit_path }}
+      #       echo "VIRTUAL_ENV=/root/${{ env.project_name }}/venv"                     >> ${{ env.nginx_unit_path }}
+      #       echo "Enviroment=PATH=\$VIRTUAL_ENV/bin:\$PATH"                           >> ${{ env.nginx_unit_path }}
+      #       echo "ExecStart=/root/${{ env.project_name }}/venv/bin/python -m superset run -p ${{ env.service_port }} --with-threads" >> ${{ env.nginx_unit_path }}
+      #       echo "[Install]"                                                          >> ${{ env.nginx_unit_path }}
+      #       echo "WantedBy=multi-user.target"                                         >> ${{ env.nginx_unit_path }}
+      #       #
+      #       echo "server {"                                                           >  ${{ env.nginx_site_path }}
+      #       echo "  server_name ${{ env.service_name }}.${{ secrets.DOMAIN }};"       >> ${{ env.nginx_site_path }}
+      #       echo "  location / {"                                                     >> ${{ env.nginx_site_path }}
+      #       echo "    proxy_pass http://127.0.0.1:${{env.service_port}};"             >> ${{ env.nginx_site_path }}
+      #       echo "    proxy_set_header Host \$host;"                                  >> ${{ env.nginx_site_path }}
+      #       echo "    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;"  >> ${{ env.nginx_site_path }}
+      #       echo "    proxy_set_header X-Forwarded-Proto \$scheme;"                   >> ${{ env.nginx_site_path }}
+      #       echo "  }"                                                                >> ${{ env.nginx_site_path }}
+      #       echo "}"                                                                  >> ${{ env.nginx_site_path }}
+      #       #
+      #       certbot --nginx -d ${{ env.service_name }}.${{ secrets.DOMAIN }} --non-interactive --agree-tos -m datnguyen.it09@gmail.com
+
+      # - name: start service
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     passphrase: ${{ secrets.SSH_PASSPHRASE }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     script: |
+      #       systemctl enable ${{ env.service_name }}.service
+      #       systemctl daemon-reload
+      #       systemctl restart ${{ env.service_name }}.service
+      #       # systemctl status ${{ env.service_name }}.service
