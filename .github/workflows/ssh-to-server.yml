@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
         with:
-          branch: main
+          ref: main
 
       - name: checkout
         uses: ./.github/actions/ssh-checkout@main
