@@ -45,7 +45,6 @@ jobs:
           superset-user: ${{ secrets.SUPERSET_ADMIN_USR }}
           superset-token: ${{ secrets.SUPERSET_ADMIN_PWD }}
 
-
       - name: Run create service unit files
         uses: ./.github/actions/create-python-unit
         with:
@@ -60,15 +59,12 @@ jobs:
           unit-site-path: ${{ env.nginx_site_path }}
           unit-site-domain: ${{ env.service_name }}.${{ secrets.DOMAIN }}
 
-      # - name: start service
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.SSH_HOST }}
-      #     username: ${{ secrets.SSH_USER }}
-      #     passphrase: ${{ secrets.SSH_PASSPHRASE }}
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     script: |
-      #       systemctl enable ${{ env.service_name }}.service
-      #       systemctl daemon-reload
-      #       systemctl restart ${{ env.service_name }}.service
-      #       # systemctl status ${{ env.service_name }}.service
+      - name: Run start service
+        uses: ./.github/actions/start-service
+        with:
+          project-name: ${{ env.project_name }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-username: ${{ secrets.SSH_USER }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          unit-service-name: ${{ secrets.NGINX_SERVICE_NAME }}

@@ -12,14 +12,14 @@ inputs:
     required: true
   unit-service-path:
     required: true
-    default: /etc/systemd/system
+    default: /etc/systemd/system/myservice.service
   unit-service-exec:
     required: true
   unit-service-port:
     required: true
   unit-site-path:
     required: true
-    default: /etc/nginx/sites-enabled
+    default: /etc/nginx/sites-enabled/myservice.domain.com
   unit-site-domain:
     required: true
     default: domain.com

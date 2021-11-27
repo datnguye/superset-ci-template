@@ -1,0 +1,32 @@
+name: 'start unit service'
+inputs:
+  project-name:
+    required: true
+  ssh-host:
+    required: true
+  ssh-username:
+    required: true
+  ssh-passphrase:
+    required: true
+  ssh-key:
+    required: true
+  ssh-key:
+    required: true
+  unit-service-name:
+    required: true
+    default: myservice
+runs:
+  using: "composite"
+  steps:
+    - name: checkout
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ inputs.ssh-host }}
+        username: ${{ inputs.ssh-username }}
+        passphrase: ${{ inputs.ssh-passphrase }}
+        key: ${{ inputs.ssh-key }}
+        script: |
+          systemctl enable ${{ inputs.unit-service-name }}.service
+          systemctl daemon-reload
+          systemctl restart ${{ inputs.unit-service-name }}.service
+          # systemctl status ${{ inputs.unit-service-name }}.service
