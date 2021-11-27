@@ -34,27 +34,16 @@ jobs:
           git-user: ${{ secrets.GIHUB_ACTION_USER }}
           git-token: ${{ secrets.GIHUB_ACTION_TOKEN }}
 
-      # - name: install superset
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.SSH_HOST }}
-      #     username: ${{ secrets.SSH_USER }}
-      #     passphrase: ${{ secrets.SSH_PASSPHRASE }}
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     script: |
-      #       cd /root/${{ env.project_name }}
-      #       apt-get install build-essential libssl-dev libffi-dev python3-dev python3-pip libsasl2-dev libldap2-dev
-      #       python -m pip install virtualenv
-      #       python -m venv venv
-      #       . venv/bin/activate
-      #       python -m pip install apache-superset
-      #       python -m pip install Flask-WTF==0.14.2
-      #       python -m pip install werkzeug==0.16.1
-      #       python -m pip install pillow==8.4.0
-      #       superset db upgrade
-      #       superset fab create-admin --username ${secrets.SUPERSET_ADMIN_USR} --firstname Dat --lastname Nguyen --email datnguyen.it09@gmail.com --password ${secrets.SUPERSET_ADMIN_PWD}
-      #       superset load_examples
-      #       superset init
+      - name: Run install superset
+        uses: ./.github/actions/install-superset
+        with:
+          project-name: ${{ env.project_name }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-username: ${{ secrets.SSH_USER }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          superset-user: ${{ secrets.SUPERSET_ADMIN_USR }}
+          superset-token: ${{ secrets.SUPERSET_ADMIN_PWD }}
 
       # - name: make service files
       #   uses: appleboy/ssh-action@master

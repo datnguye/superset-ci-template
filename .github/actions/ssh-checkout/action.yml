@@ -1,10 +1,7 @@
-name: 'checkout-repo'
-description: 'Check out the repository'
+name: 'checkout repo'
 inputs:
   project-name:
-    description: 'Project name'
     required: true
-    default: 'your-repo-name'
   ssh-host:
     required: true
   ssh-username:
@@ -28,6 +25,6 @@ runs:
         passphrase: ${{ inputs.ssh-passphrase }}
         key: ${{ inputs.ssh-key }}
         script: |
-          mkdir /root/archive
+          mkdir /root/archive > /dev/null
           mv ${{ inputs.project-name }} /root/archive/${{ inputs.project-name }}-$(date +%s) > /dev/null
           git clone https://${{ inputs.git-user }}:${{ inputs.git-token }}@github.com/datnguye/${{ inputs.who-to-greet }}.git

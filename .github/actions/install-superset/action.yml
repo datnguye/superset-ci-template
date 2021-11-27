@@ -1,0 +1,45 @@
+name: 'install service'
+inputs:
+  project-name:
+    required: true
+  ssh-host:
+    required: true
+  ssh-username:
+    required: true
+  ssh-passphrase:
+    required: true
+  ssh-key:
+    required: true
+  ssh-key:
+    required: true
+  superset-user:
+    required: true
+  superset-password:
+    required: true
+  superset-email:
+    required: true
+    default: datnguyen.it09@gmail.com
+runs:
+  using: "composite"
+  steps:
+    - name: checkout
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ inputs.ssh-host }}
+        username: ${{ inputs.ssh-username }}
+        passphrase: ${{ inputs.ssh-passphrase }}
+        key: ${{ inputs.ssh-key }}
+        script: |
+          cd /root/${{ inputs.project-name }}
+          apt-get install build-essential libssl-dev libffi-dev python3-dev python3-pip libsasl2-dev libldap2-dev
+          python -m pip install virtualenv
+          python -m venv venv
+          . venv/bin/activate
+          python -m pip install apache-superset
+          python -m pip install Flask-WTF==0.14.2
+          python -m pip install werkzeug==0.16.1
+          python -m pip install pillow==8.4.0
+          superset db upgrade
+          superset fab create-admin --username ${{ inputs.superset-user }} --firstname Superset --lastname Admin --email ${{ inputs.superset-email }} --password ${{ inputs.superset-password }}
+          superset load_examples
+          superset init
