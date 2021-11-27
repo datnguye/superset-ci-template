@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: checkout
-        uses: ./.github/actions/ssh-checkout@main
+        uses: ./.github/actions/ssh-checkout
         with:
           project-name: ${{ env.project_name }}
 
